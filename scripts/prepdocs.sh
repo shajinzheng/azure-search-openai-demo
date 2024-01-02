@@ -53,13 +53,25 @@ if [ -n "$AZURE_TENANT_ID" ]; then
   tenantArg="--tenantid $AZURE_TENANT_ID"
 fi
 
+azure_search_index=$AZURE_SEARCH_INDEX
+if [ -n "$1" ]; then
+  azure_search_index="$1"
+  echo "WARNING - '$azure_search_index'" is provided from command line argument. Use that instead of "'$AZURE_SEARCH_INDEX'"
+fi
+
+files='./data/*'
+if [ -n "$2" ]; then
+  files="$2"
+  echo "WARNING - '$files' is provided from command line argument. Use that instead of './data/*'"
+fi
+
 ./scripts/.venv/bin/python ./scripts/prepdocs.py \
-'./data/*' $adlsGen2StorageAccountArg $adlsGen2FilesystemArg $adlsGen2FilesystemPathArg $searchAnalyzerNameArg \
+"$files" $adlsGen2StorageAccountArg $adlsGen2FilesystemArg $adlsGen2FilesystemPathArg $searchAnalyzerNameArg \
 $aclArg  --storageaccount "$AZURE_STORAGE_ACCOUNT" \
 $searchImagesArg $visionEndpointArg $visionKeyArg $visionKeyVaultkey $visionKeyVaultName \
 --container "$AZURE_STORAGE_CONTAINER" --searchservice "$AZURE_SEARCH_SERVICE" \
 --openaiservice "$AZURE_OPENAI_SERVICE" --openaideployment "$AZURE_OPENAI_EMB_DEPLOYMENT" \
---openaimodelname "$AZURE_OPENAI_EMB_MODEL_NAME" --index "$AZURE_SEARCH_INDEX" \
+--openaimodelname "$AZURE_OPENAI_EMB_MODEL_NAME" --index "$azure_search_index" \
 --formrecognizerservice "$AZURE_FORMRECOGNIZER_SERVICE" --openaimodelname "$AZURE_OPENAI_EMB_MODEL_NAME" \
 $tenantArg --openaihost "$OPENAI_HOST" \
 --openaikey "$OPENAI_API_KEY" -v
